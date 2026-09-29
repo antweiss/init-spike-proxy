@@ -1,6 +1,6 @@
 # Init-spike HTTP proxy
 
-A JDK 17 forwarding proxy that **burns CPU and retains a large ACL/WAF-style rule set on startup**, then serves traffic. Useful as a workload that shows a startup resource spike (CPU + heap) before settling into a cheaper request path.
+A JDK 25 forwarding proxy that **burns CPU and retains a large ACL/WAF-style rule set on startup**, then serves traffic. Useful as a workload that shows a startup resource spike (CPU + heap) before settling into a cheaper request path.
 
 ## What init does
 
