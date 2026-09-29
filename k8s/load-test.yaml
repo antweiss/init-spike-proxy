@@ -82,7 +82,7 @@ spec:
     spec:
       containers:
         - name: k6
-          image: 890742564278.dkr.ecr.eu-north-1.amazonaws.com/k6:0.54.0
+          image: grafana/k6:0.54.0
           args:
             - run
             - --no-color
