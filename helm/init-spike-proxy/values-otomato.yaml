@@ -1,5 +1,5 @@
 image:
-  repository: 890742564278.dkr.ecr.eu-north-1.amazonaws.com/java-proxy
+  repository: otomato/java-proxy
   tag: "1.0.0"
   pullPolicy: Always
 
