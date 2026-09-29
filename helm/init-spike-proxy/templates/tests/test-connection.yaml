@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "init-spike-proxy.fullname" . }}-test-healthz"
+  labels:
+    {{- include "init-spike-proxy.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: wget
+      image: {{ .Values.test.image | default "busybox:1.37" }}
+      command:
+        - wget
+        - "--spider"
+        - "--timeout=10"
+        - "http://{{ include "init-spike-proxy.fullname" . }}:{{ .Values.service.port }}/healthz"

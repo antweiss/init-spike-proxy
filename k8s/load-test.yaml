@@ -1,0 +1,103 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: k6-script
+  namespace: otomato
+data:
+  script.js: |
+    import http from 'k6/http';
+    import { check, sleep } from 'k6';
+
+    const BASE_URL = 'http://init-spike-proxy.otomato.svc.cluster.local:8080';
+
+    export const options = {
+      // Continuous load: ramp up and hold indefinitely (no duration on last executor)
+      scenarios: {
+        continuous: {
+          executor: 'ramping-vus',
+          startVUs: 0,
+          stages: [
+            { duration: '30s', target: 5  },  // warm-up
+            { duration: '60s', target: 5  },  // hold at 5 VUs forever
+            { duration: '999h', target: 5 },
+          ],
+        },
+      },
+      thresholds: {
+        http_req_failed:   ['rate<0.10'],
+        http_req_duration: ['p(95)<500'],
+      },
+    };
+
+    // A spread of internal service hostnames that hit different rule buckets
+    const HOSTS = Array.from({length: 20}, (_, i) => `svc-${i * 200}.internal.example`);
+
+    export default function () {
+      const choice = Math.random();
+
+      if (choice < 0.2) {
+        // Health check
+        const res = http.get(`${BASE_URL}/healthz`);
+        check(res, { 'healthz 200': (r) => r.status === 200 });
+
+      } else if (choice < 0.4) {
+        // Readiness check
+        const res = http.get(`${BASE_URL}/readyz`);
+        check(res, { 'readyz 200': (r) => r.status === 200 });
+
+      } else {
+        // Rule engine exercise — proxy to an internal host (no real upstream needed;
+        // rule will ALLOW, DENY, or REWRITE — all valid responses from the proxy)
+        const host = HOSTS[Math.floor(Math.random() * HOSTS.length)];
+        const path = `/api/v${Math.floor(Math.random() * 9)}/resource/${Math.floor(Math.random() * 200000)}`;
+        const url = encodeURIComponent(`http://${host}${path}`);
+        const res = http.get(`${BASE_URL}/proxy?url=${url}`, { timeout: '10s' });
+        check(res, {
+          'proxy responded':    (r) => r.status > 0,
+          'not a 500':          (r) => r.status !== 500,
+          'allow or deny':      (r) => [200, 403, 502].includes(r.status),
+        });
+      }
+
+      sleep(0.05);
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: k6-load-test
+  namespace: otomato
+  labels:
+    app: k6-load-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k6-load-test
+  template:
+    metadata:
+      labels:
+        app: k6-load-test
+    spec:
+      containers:
+        - name: k6
+          image: 890742564278.dkr.ecr.eu-north-1.amazonaws.com/k6:0.54.0
+          args:
+            - run
+            - --no-color
+            - /scripts/script.js
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              memory: "1Gi"
+          volumeMounts:
+            - name: k6-script
+              mountPath: /scripts
+      volumes:
+        - name: k6-script
+          configMap:
+            name: k6-script
+      restartPolicy: Always

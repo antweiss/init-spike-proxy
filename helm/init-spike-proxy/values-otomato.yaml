@@ -1,0 +1,35 @@
+image:
+  repository: 890742564278.dkr.ecr.eu-north-1.amazonaws.com/java-proxy
+  tag: "1.0.0"
+  pullPolicy: Always
+
+proxy:
+  ruleCount: 500000
+  initCpuPasses: 77
+
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "1536Mi"
+  limits:
+    cpu: null
+    memory: "3Gi"
+
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 180
+  periodSeconds: 20
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http
+  initialDelaySeconds: 150
+  periodSeconds: 15
+  failureThreshold: 10
+
+test:
+  image: 890742564278.dkr.ecr.eu-north-1.amazonaws.com/busybox@sha256:66a6306db78bf2dbf3487f293aa8d6990d8e506fdffab9cc43fe422becf886e4

@@ -1,0 +1,33 @@
+init-spike-proxy has been deployed.
+
+NOTE: The proxy runs a CPU/memory-heavy init phase before it starts accepting
+traffic. The readiness probe is intentionally delayed — give it about
+{{ .Values.readinessProbe.initialDelaySeconds }}s before expecting a healthy pod.
+
+1. Get the application URL:
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}
+{{- end }}
+{{- else if eq .Values.service.type "NodePort" }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "init-spike-proxy.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo "http://$NODE_IP:$NODE_PORT"
+{{- else if eq .Values.service.type "LoadBalancer" }}
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "init-spike-proxy.fullname" . }} --template "{{"{{range (index .status.loadBalancer.ingress 0)}}{{.}}{{end}}"}}")
+  echo "http://$SERVICE_IP:{{ .Values.service.port }}"
+{{- else }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward svc/{{ include "init-spike-proxy.fullname" . }} 8080:{{ .Values.service.port }}
+  echo "http://localhost:8080"
+{{- end }}
+
+2. Health check:
+  curl http://<address>/healthz
+
+3. Forward a request:
+  curl 'http://<address>/proxy?url=https://example.com'
+
+4. Tune the init spike (set in values.yaml or with --set):
+  proxy.ruleCount        — number of rules compiled on startup (default {{ .Values.proxy.ruleCount }})
+  proxy.initCpuPasses    — CPU burn passes (default {{ .Values.proxy.initCpuPasses }})
+  proxy.rulePayloadBytes — bytes retained per rule (default {{ .Values.proxy.rulePayloadBytes }})

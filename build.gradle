@@ -1,0 +1,41 @@
+plugins {
+    id 'java'
+}
+
+group = 'com.initspike'
+version = '1.0.0'
+description = 'Forwarding HTTP proxy that burns CPU and loads a large rule set during initialization.'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+compileJava.options.encoding = 'UTF-8'
+compileTestJava.options.encoding = 'UTF-8'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events 'passed', 'skipped', 'failed'
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.initspike.proxy.ProxyApp'
+    }
+    // Bundle all dependencies into a fat jar (none currently, but future-proof)
+    from configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

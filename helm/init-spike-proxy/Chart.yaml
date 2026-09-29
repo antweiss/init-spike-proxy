@@ -1,0 +1,12 @@
+apiVersion: v2
+name: init-spike-proxy
+description: Forwarding HTTP proxy with a CPU/memory-heavy init spike. Useful for testing startup resource behaviour.
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - proxy
+  - init-spike
+  - benchmarking
+maintainers:
+  - name: initspike

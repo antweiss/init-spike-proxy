@@ -1,0 +1,105 @@
+# Default values for init-spike-proxy.
+
+replicaCount: 1
+
+image:
+  repository: init-spike-proxy
+  pullPolicy: IfNotPresent
+  # Override with the image tag to deploy, e.g. "1.0.0" or a commit SHA.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  runAsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: true
+  capabilities:
+    drop:
+      - ALL
+
+service:
+  type: ClusterIP
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: proxy.example.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# ------------------------------------------------------------------
+# Proxy tuning — maps directly to the app's environment variables.
+# ------------------------------------------------------------------
+proxy:
+  listenPort: 8080
+  ruleCount: 200000
+  initCpuPasses: 4
+  rulePayloadBytes: 256
+  # workerThreads: leave unset to use the default (2 × container cores).
+  workerThreads: ""
+
+# ------------------------------------------------------------------
+# Resources.
+# Init is CPU/memory-heavy; keep requests generous so the pod isn't
+# throttled during startup.  Tune down for dev environments.
+# ------------------------------------------------------------------
+resources:
+  requests:
+    cpu: "1000m"
+    memory: "768Mi"
+  limits:
+    cpu: "2000m"
+    memory: "1536Mi"
+
+# Liveness: start checking after the init spike has had time to finish.
+livenessProbe:
+  httpGet:
+    path: /healthz
+    port: http
+  initialDelaySeconds: 60
+  periodSeconds: 15
+  failureThreshold: 3
+
+# Readiness: same endpoint, shorter initial delay so traffic starts
+# flowing as soon as the server is up.
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  failureThreshold: 6
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+
+volumes: []
+volumeMounts: []
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
