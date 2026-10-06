@@ -11,5 +11,9 @@ spec:
       targetPort: http
       protocol: TCP
       name: http
+    - port: {{ .Values.service.connectPort }}
+      targetPort: connect
+      protocol: TCP
+      name: connect
   selector:
     {{- include "init-spike-proxy.selectorLabels" . | nindent 4 }}

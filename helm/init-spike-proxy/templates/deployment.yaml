@@ -42,9 +42,14 @@ spec:
             - name: http
               containerPort: {{ .Values.proxy.listenPort }}
               protocol: TCP
+            - name: connect
+              containerPort: {{ .Values.proxy.connectPort }}
+              protocol: TCP
           env:
             - name: LISTEN_PORT
               value: {{ .Values.proxy.listenPort | quote }}
+            - name: CONNECT_PORT
+              value: {{ .Values.proxy.connectPort | quote }}
             - name: RULE_COUNT
               value: {{ .Values.proxy.ruleCount | quote }}
             - name: INIT_CPU_PASSES

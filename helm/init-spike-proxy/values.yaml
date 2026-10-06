@@ -36,6 +36,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8080
+  connectPort: 8443
 
 ingress:
   enabled: false
@@ -53,6 +54,7 @@ ingress:
 # ------------------------------------------------------------------
 proxy:
   listenPort: 8080
+  connectPort: 8443
   ruleCount: 200000
   initCpuPasses: 4
   rulePayloadBytes: 256

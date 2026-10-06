@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.initspike'
-version = '1.0.0'
+version = '1.1.0'
 description = 'Forwarding HTTP proxy that burns CPU and loads a large rule set during initialization.'
 
 java {

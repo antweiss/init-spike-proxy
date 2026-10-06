@@ -6,7 +6,7 @@ RUN gradle -q jar --no-daemon
 
 FROM eclipse-temurin:25-jre
 WORKDIR /app
-COPY --from=build /src/build/libs/init-spike-proxy-1.0.0.jar /app/proxy.jar
+COPY --from=build /src/build/libs/init-spike-proxy-1.1.0.jar /app/proxy.jar
 ENV LISTEN_PORT=8080 \
     CONNECT_PORT=8443 \
     RULE_COUNT=200000 \

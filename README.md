@@ -13,7 +13,7 @@ After init, matching is an index lookup plus a short scan; the heavy compile wor
 
 ```bash
 gradle build
-java -jar build/libs/init-spike-proxy-1.0.0.jar
+java -jar build/libs/init-spike-proxy-1.1.0.jar
 ```
 
 Health check:
@@ -57,5 +57,5 @@ curl -s -X POST 'localhost:8080/admin/reload?count=50000&payload=128'
 Tune the spike up with more rules/passes, or down for laptops:
 
 ```bash
-RULE_COUNT=50000 INIT_CPU_PASSES=2 java -jar build/libs/init-spike-proxy-1.0.0.jar
+RULE_COUNT=50000 INIT_CPU_PASSES=2 java -jar build/libs/init-spike-proxy-1.1.0.jar
 ```
