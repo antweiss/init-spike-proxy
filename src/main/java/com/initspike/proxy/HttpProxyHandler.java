@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 final class HttpProxyHandler implements HttpHandler {
   private static final Set<String> HOP_BY_HOP =
@@ -27,11 +28,11 @@ final class HttpProxyHandler implements HttpHandler {
           "upgrade",
           "host");
 
-  private final RuleEngine engine;
+  private final AtomicReference<RuleEngine> engineRef;
   private final HttpClient client;
 
-  HttpProxyHandler(RuleEngine engine) {
-    this.engine = engine;
+  HttpProxyHandler(AtomicReference<RuleEngine> engineRef) {
+    this.engineRef = engineRef;
     this.client =
         HttpClient.newBuilder()
             .followRedirects(HttpClient.Redirect.NEVER)
@@ -59,6 +60,7 @@ final class HttpProxyHandler implements HttpHandler {
   }
 
   private void dispatch(HttpExchange exchange) throws IOException, InterruptedException {
+    RuleEngine engine = engineRef.get();
     String path = exchange.getRequestURI().getPath();
     if ("/healthz".equals(path) || "/readyz".equals(path)) {
       sendPlain(exchange, 200, "ok rules=" + engine.size());

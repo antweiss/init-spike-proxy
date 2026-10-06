@@ -23,7 +23,7 @@ final class InitSpike {
         config.ruleCount, config.cpuPasses, config.payloadBytes);
 
     burnCpu(config);
-    RuleEngine engine = loadRules(config);
+    RuleEngine engine = loadRules(config.ruleCount, config.payloadBytes);
 
     long elapsedMs = (System.nanoTime() - started) / 1_000_000L;
     Runtime rt = Runtime.getRuntime();
@@ -81,11 +81,11 @@ final class InitSpike {
     return sum;
   }
 
-  private static RuleEngine loadRules(ProxyConfig config) {
+  static RuleEngine loadRules(int ruleCount, int payloadBytes) {
     List<AccessRule> rules =
-        IntStream.range(0, config.ruleCount)
+        IntStream.range(0, ruleCount)
             .parallel()
-            .mapToObj(i -> compileRule(i, config.payloadBytes))
+            .mapToObj(i -> compileRule(i, payloadBytes))
             .toList();
 
     ConcurrentHashMap<String, List<Integer>> hostIndex = new ConcurrentHashMap<>();

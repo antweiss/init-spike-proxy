@@ -13,6 +13,7 @@ import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -50,7 +51,7 @@ class HttpProxyHandlerTest {
     @BeforeEach
     void startServer() throws Exception {
         engine = buildEngine();
-        HttpProxyHandler handler = new HttpProxyHandler(engine);
+        HttpProxyHandler handler = new HttpProxyHandler(new AtomicReference<>(engine));
 
         server = HttpServer.create(new InetSocketAddress(0), 0);
         server.createContext("/", handler);

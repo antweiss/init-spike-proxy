@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -55,7 +56,7 @@ class ConnectTunnelTest {
         upstream.bind(new InetSocketAddress("127.0.0.1", 0));
         upstreamPool.submit(this::runEcho);
 
-        tunnel = new ConnectTunnel(0, engineWithDeny("blocked.local"), 4);
+        tunnel = new ConnectTunnel(0, new AtomicReference<>(engineWithDeny("blocked.local")), 4);
         tunnel.start();
     }
 

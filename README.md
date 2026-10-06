@@ -34,6 +34,15 @@ Use it as an HTTPS forward proxy via CONNECT (second listener on port 8443):
 curl -s --proxy http://localhost:8443 https://example.com
 ```
 
+Hot-reload the rule set at runtime (both listeners pick up the swap on the next request):
+
+```bash
+curl -s -X POST 'localhost:8080/admin/reload?count=50000&payload=128'
+# reloaded rules=50000 indexes=4096 elapsed=312ms
+```
+
+`count` and `payload` are optional; both default to the values in `ProxyConfig`.
+
 ## Environment
 
 | Variable | Default | Role |

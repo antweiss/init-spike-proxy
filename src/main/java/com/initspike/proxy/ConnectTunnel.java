@@ -11,6 +11,7 @@ import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Minimal HTTPS forward proxy: accepts the HTTP CONNECT method on its own
@@ -19,14 +20,14 @@ import java.util.concurrent.Executors;
  */
 final class ConnectTunnel {
   private final int configuredPort;
-  private final RuleEngine engine;
+  private final AtomicReference<RuleEngine> engineRef;
   private final ExecutorService workers;
   private final Thread acceptor;
   private volatile ServerSocket server;
 
-  ConnectTunnel(int port, RuleEngine engine, int workerThreads) {
+  ConnectTunnel(int port, AtomicReference<RuleEngine> engineRef, int workerThreads) {
     this.configuredPort = port;
-    this.engine = engine;
+    this.engineRef = engineRef;
     this.workers =
         Executors.newFixedThreadPool(
             workerThreads,
@@ -109,7 +110,7 @@ final class ConnectTunnel {
         return;
       }
 
-      AccessRule rule = engine.match(URI.create("https://" + target.host + "/"));
+      AccessRule rule = engineRef.get().match(URI.create("https://" + target.host + "/"));
       if (rule.action == AccessRule.RuleAction.DENY) {
         writeStatus(client, 403, "Forbidden", "denied by rule " + rule.id);
         close(client);
