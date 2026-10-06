@@ -22,17 +22,24 @@ Health check:
 curl -s localhost:8080/healthz
 ```
 
-Forward a URL (explicit query form, no CONNECT tunneling):
+Forward a URL (explicit query form on the HTTP listener):
 
 ```bash
 curl -s 'localhost:8080/proxy?url=https://example.com'
+```
+
+Use it as an HTTPS forward proxy via CONNECT (second listener on port 8443):
+
+```bash
+curl -s --proxy http://localhost:8443 https://example.com
 ```
 
 ## Environment
 
 | Variable | Default | Role |
 |---|---|---|
-| `LISTEN_PORT` | `8080` | Bind port |
+| `LISTEN_PORT` | `8080` | Bind port for the HTTP listener (`/healthz`, `/proxy?url=…`) |
+| `CONNECT_PORT` | `8443` | Bind port for the HTTPS CONNECT tunnel |
 | `RULE_COUNT` | `200000` | Rules compiled and retained on heap |
 | `INIT_CPU_PASSES` | `4` | Extra full-core hash/sieve passes before rule load |
 | `RULE_PAYLOAD_BYTES` | `256` | Extra bytes kept per rule |

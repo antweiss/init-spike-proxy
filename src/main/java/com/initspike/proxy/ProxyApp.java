@@ -16,8 +16,12 @@ public final class ProxyApp {
     server.setExecutor(Executors.newFixedThreadPool(config.workerThreads));
     server.start();
 
+    ConnectTunnel tunnel = new ConnectTunnel(config.connectPort, engine, config.workerThreads);
+    tunnel.start();
+
     System.out.printf(
         "proxy listening on :%d  GET /healthz  GET /proxy?url=https://example.com%n",
         config.listenPort);
+    System.out.printf("CONNECT tunnel listening on :%d (HTTPS forward proxy)%n", tunnel.boundPort());
   }
 }

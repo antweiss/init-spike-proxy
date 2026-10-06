@@ -18,6 +18,12 @@ class ProxyConfigTest {
     }
 
     @Test
+    void fromEnv_connectPort_defaultIs8443() {
+        ProxyConfig config = ProxyConfig.fromEnv();
+        assertEquals(8443, config.connectPort);
+    }
+
+    @Test
     void fromEnv_ruleCount_defaultIs200000() {
         ProxyConfig config = ProxyConfig.fromEnv();
         assertEquals(200_000, config.ruleCount);

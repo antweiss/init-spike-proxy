@@ -2,13 +2,21 @@ package com.initspike.proxy;
 
 final class ProxyConfig {
   final int listenPort;
+  final int connectPort;
   final int ruleCount;
   final int cpuPasses;
   final int payloadBytes;
   final int workerThreads;
 
-  private ProxyConfig(int listenPort, int ruleCount, int cpuPasses, int payloadBytes, int workerThreads) {
+  private ProxyConfig(
+      int listenPort,
+      int connectPort,
+      int ruleCount,
+      int cpuPasses,
+      int payloadBytes,
+      int workerThreads) {
     this.listenPort = listenPort;
+    this.connectPort = connectPort;
     this.ruleCount = ruleCount;
     this.cpuPasses = cpuPasses;
     this.payloadBytes = payloadBytes;
@@ -19,6 +27,7 @@ final class ProxyConfig {
     int cores = Math.max(1, Runtime.getRuntime().availableProcessors());
     return new ProxyConfig(
         envInt("LISTEN_PORT", 8080),
+        envInt("CONNECT_PORT", 8443),
         envInt("RULE_COUNT", 200_000),
         envInt("INIT_CPU_PASSES", 4),
         envInt("RULE_PAYLOAD_BYTES", 256),
